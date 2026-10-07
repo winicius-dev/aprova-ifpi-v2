@@ -1,0 +1,270 @@
+{% load static %}
+
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <title>Aprova IFPI</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    .navbar { padding: 0.6rem 1rem; min-height: 70px; }
+    nav.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; }
+    
+    .faixa {
+      position: fixed;
+      top: 15%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      height: 33px;
+      background-image: linear-gradient(to right, #0051f2, #0051f2, #ffffff, #ffffff);
+      height: 35px;
+      margin-top: -10px;
+      z-index: 101;
+    }
+
+    @media (max-width: 992px), (max-width: 576px) {
+      .faixa {
+        top: 10%;
+        height: 40px;
+      }
+    }
+
+    main { padding-top: 120px; }
+
+    .nav-link { 
+      font-family: Arial, Helvetica, sans-serif; 
+      font-weight: 600; 
+      color: #0056b3; 
+      font-size: 15px; 
+      position: relative; 
+    }
+    .nav-link:hover, .nav-link.active:hover { color: rgb(0, 30, 119); }
+    
+    @media (min-width: 991px) {
+      .nav-link::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background-color: #0067d4;
+        visibility: hidden;
+        transition: 0.3s ease-in-out;
+      }
+      .nav-link:hover::before, .nav-link.nav-link.active::before {
+        width: 100%;
+        visibility: visible;
+      }
+    }
+
+    .navbar-brand img { height: 60px; width: auto; display: block; }
+    .navbar-nav { display: flex; justify-content: center; align-items: center; gap: 1.5rem; font-size: 0.94rem; }
+    .navbar-toggler { border: none; }
+    .navbar-toggler:focus, .btn-close:focus { outline: none; box-shadow: none; }
+
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      overflow-x: hidden !important; 
+      font-family: "Poppins", sans-serif; 
+      background-color: #f8f9ff; 
+    }
+
+    .sobre-hero { 
+      background: linear-gradient(135deg, #007bff, #0099ff); 
+      min-height: 60vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      text-align: center; 
+      color: white; 
+      padding: 60px 20px; 
+    }
+    .sobre-hero h1 { font-size: 3rem; font-weight: 700; }
+    .sobre-hero p { font-size: 1.2rem; max-width: 700px; margin: 0 auto; }
+
+    .card { border: none; border-radius: 1rem; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); }
+    .bg-gradient { background: linear-gradient(135deg, #0099ff, #007bff); color: white; }
+
+    @media (max-width: 768px) {
+      .sobre-hero h1 { font-size: 2.2rem; }
+      .sobre-hero p { font-size: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar bg-light navbar-expand-lg fixed-top">
+      <div class="container-fluid d-flex align-items-center justify-content-between">
+        <a class="navbar-brand ms-2" href="{% url 'questoes' %}">
+          <img src="{% static 'img/logo_aprovaifpi.svg' %}" alt="Logo">
+        </a>
+
+        <button class="navbar-toggler me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title">APROVAIFPI</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+
+          <div class="offcanvas-body d-flex flex-column flex-lg-row justify-content-center align-items-center">
+            <ul class="navbar-nav justify-content-center flex-grow-1 pe-3">
+              <li class="nav-item"><a class="nav-link" href="{% url 'questoes' %}">QUESTÕES</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'conteudos' %}">CONTEÚDOS</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'ranking' %}">RANKING</a></li>
+              <li class="nav-item"><a class="nav-link active text-primary" href="{% url 'sobre' %}">SOBRE</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="faixa"></div>
+  </header>
+
+  <main>
+    <section class="sobre-hero">
+      <div class="container">
+        <h1>AprovaIFPI</h1>
+        <p>Uma plataforma feita por alunos do IFPI para alunos que desejam ingressar no IFPI.</p>
+      </div>
+    </section>
+
+    <section class="py-5 text-center">
+      <div class="container">
+        <h2 class="text-primary fw-bold mb-3">Quem Somos?</h2>
+        <p class="mx-auto mb-4" style="max-width: 800px;">
+          Somos um grupo de estudantes do IFPI - Campus São Raimundo Nonato: Victor Daniel, Marcos Winicius, João Gabriel e orientadores: Alexandre Cajazeiras e Alexandre Lages.
+          Criamos o AprovaIFPI com o propósito de facilitar o acesso ao estudo e ajudar alunos do 9º ano a se prepararem para o exame classificatório do IFPI.
+        </p>
+        <img src="{% static 'img/63588de2-07bd-4e5a-9de7-4b98eebf1359.jpg' %}" alt="Equipe AprovaIFPI" class="img-fluid rounded-4 shadow-sm" style="max-width: 400px;">
+      </div>
+    </section>
+
+    <section class="py-5 bg-white text-center">
+      <div class="container">
+        <h2 class="text-primary fw-bold mb-3">Nossa Missão</h2>
+        <p class="mx-auto" style="max-width: 800px;">
+          Oferecer uma plataforma gratuita de estudos para alunos do 9° ano se prepararem para o exame classificatório do IFPI.
+          Com banco de questões, conteúdos de português e matemática, XP e ranking competitivo.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-5 text-center">
+      <div class="container">
+        <h2 class="text-primary fw-bold mb-4">Como o AprovaIFPI Funciona</h2>
+        <div class="row g-4 justify-content-center">
+          <div class="col-md-4 col-sm-10">
+            <div class="card p-4 h-100">
+              <i class="bi bi-journal-check fs-1 text-primary mb-3"></i>
+              <h5>Pratique Questões</h5>
+              <p>Encontre exercícios filtrados por disciplina, conteúdo e ano, e teste seus conhecimentos!</p>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-sm-10">
+            <div class="card p-4 h-100">
+              <i class="bi bi-trophy fs-1 text-primary mb-3"></i>
+              <h5>Suba de XP no Ranking</h5>
+              <p>Ganhe XP ao acertar respostas e veja sua posição entre outros alunos.</p>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-sm-10">
+            <div class="card p-4 h-100">
+              <i class="bi bi-book fs-1 text-primary mb-3"></i>
+              <h5>Estude os Conteúdos</h5>
+              <p>Tire dúvidas e receba explicações automáticas com nossa assistente de estudo inteligente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-5 bg-white text-center">
+      <div class="container">
+        <h2 class="text-primary fw-bold mb-3">Tecnologias Utilizadas</h2>
+        <div class="d-flex justify-content-center gap-4 fs-1 mb-3">
+          <i class="bi bi-filetype-html text-primary"></i>
+          <i class="bi bi-filetype-css text-primary"></i>
+          <i class="bi bi-filetype-js text-primary"></i>
+          <i class="bi bi-filetype-py text-primary"></i>
+          <i class="bi bi-github text-primary"></i>
+        </div>
+        <p>Construído com HTML, CSS, JavaScript, Django e hospedado no GitHub Pages.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-light text-dark pt-5 pb-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3 mb-4">
+          <h5 class="text-uppercase fw-bold">AprovaIFPI.com</h5>
+          <ul class="list-unstyled">
+            <li><a href="{% url 'logout' %}" class="text-secondary text-decoration-none d-block py-1">Login</a></li>
+            <li><a href="{% url 'questoes' %}" class="text-secondary text-decoration-none d-block py-1">Questões</a></li>
+            <li><a href="{% url 'conteudos' %}" class="text-secondary text-decoration-none d-block py-1">Conteúdos</a></li>
+            <li><a href="{% url 'ranking' %}" class="text-secondary text-decoration-none d-block py-1">Rankings</a></li>
+            <li><a href="{% url 'sobre' %}" class="text-secondary text-decoration-none d-block py-1">Sobre</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-3 mb-4">
+          <h5 class="text-uppercase fw-bold">Colaboradores</h5>
+          <ul class="list-unstyled">
+            <li>Aluno João Gabriel Lopes</li>
+            <li>Aluno Marcos Winicius Gomes</li>
+            <li>Aluno Victor Daniel Castro</li>
+            <li>Prof. Alexandre Cajazeira</li>
+            <li>Prof. Alexandre Lages</li>
+          </ul>
+        </div>
+
+        <div class="col-md-3 mb-4">
+          <h5 class="text-uppercase fw-bold">Recursos Utilizados</h5>
+          <ul class="list-unstyled">
+            <li>Bootstrap 5</li>
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>JavaScript</li>
+            <li>Django</li>
+          </ul>
+        </div>
+
+        <div class="col-md-3 mb-4">
+          <h5 class="text-uppercase fw-bold">Disciplinas</h5>
+          <ul class="list-unstyled">
+            <li>Português</li>
+            <li>Matemática</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="border-light">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img src="{% static 'img/logo_aprovaifpi 1.svg' %}" alt="Logo AprovaIFPI" height="40" class="me-2">
+          <span class="fw-bold">© 2025 - Um produto AprovaIFPI.com</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

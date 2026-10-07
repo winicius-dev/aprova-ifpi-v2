@@ -1,0 +1,212 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AprovaIFPI - Cadastro</title>
+
+
+
+</head>
+
+<body style="margin:0; padding:0; width:100%; height:100%;">
+
+
+<main class="w-100 h-100">
+
+    <div class="container-fluid h-100">
+
+        <div class="row vh-100">
+
+            <!-- LADO DA LOGO -->
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center align-items-center position-relative"
+                id="colLogo">
+
+                <img src="{% static 'img/logo_aprovaifpi.svg' %}"
+                    alt="AprovaIFPI Logo"
+                    class="img-fluid img-logo" />
+
+                <img src="{% static 'img/logo_background.svg' %}"
+                    alt="logo background"
+                    class="img-background position-absolute" />
+
+                <img src="{% static 'img/line_background.svg' %}"
+                    alt="line background 1"
+                    class="line-background position-absolute"
+                    id="lineBackground1" />
+
+            </div>
+
+
+            <!-- LADO DO FORMULÁRIO -->
+            <div class="col-12 col-lg-6 d-flex justify-content-center align-items-center"
+                id="colForm">
+
+                <div class="form-container">
+
+                    <img src="{% static 'img/full_logo.png' %}"
+                        alt="logo completa"
+                        class="full-logo img-fluid" />
+
+
+                    <div class="d-flex">
+
+                        <h4 class="fw-light">Crie sua&nbsp;</h4>
+
+                        <h4 class="fw-bolder">conta</h4>
+
+                    </div>
+
+
+                    {% if messages %}
+
+                    <div class="mb-3">
+
+                        {% for message in messages %}
+
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}"
+                            role="alert">
+
+                            {{ message }}
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <form action="{% url 'cadastro' %}" method="POST" novalidate>
+
+                        {% csrf_token %}
+
+
+                        <div class="form-group mb-3">
+
+                            <label class="form-label">
+                                Nome completo
+                            </label>
+
+                            <input type="text"
+                                name="nome"
+                                class="form-control"
+                                required />
+
+                        </div>
+
+
+                        <div class="form-group mb-3">
+
+                            <label class="form-label">
+                                Email
+                            </label>
+
+                            <input type="email"
+                                name="email"
+                                class="form-control"
+                                required />
+
+                        </div>
+
+
+                        <div class="form-group mb-3">
+
+                            <label class="form-label">
+                                Escola
+                            </label>
+
+                            <select name="escola"
+                                class="form-control"
+                                required>
+
+                                <option value="">
+                                    Selecione sua escola
+                                </option>
+
+                                {% for escola in escolas %}
+
+                                <option value="{{ escola.id }}">
+                                    {{ escola.nome }} - {{ escola.cidade }}/{{ escola.estado }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group mb-3">
+
+                            <label class="form-label">
+                                Senha
+                            </label>
+
+                            <input type="password"
+                                name="senha"
+                                class="form-control"
+                                required />
+
+                        </div>
+
+
+                        <div class="form-group mb-3">
+
+                            <label class="form-label">
+                                Confirmar senha
+                            </label>
+
+                            <input type="password"
+                                name="confirmar_senha"
+                                class="form-control"
+                                required />
+
+                        </div>
+
+
+                        <button type="submit"
+                            class="btn-login">
+
+                            Cadastrar
+
+                        </button>
+
+
+                        <p class="mt-2 text-sm text-center">
+
+                            Já possui uma conta?&nbsp;
+
+                            <a href="{% url 'login' %}"
+                                class="form-link">
+
+                                Entre aqui!
+
+                            </a>
+
+                        </p>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+
+</html>

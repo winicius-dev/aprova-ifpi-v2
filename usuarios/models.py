@@ -1,0 +1,82 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class Escola(models.Model):
+    codigo_inep = models.CharField(max_length=20)
+    nome = models.CharField(max_length=200)
+    cidade = models.CharField(max_length=100)
+    estado = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nome
+
+
+class Perfil(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=50)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    xp = models.IntegerField(default=0)
+    avatar = models.ImageField(blank=True)
+    escola = models.ForeignKey(Escola, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.nome
+
+
+class Disciplina(models.Model):
+    nome = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nome
+
+
+class Conteudo(models.Model):
+    nome = models.CharField(max_length=200)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.nome
+
+
+class Questao(models.Model):
+    enunciado = models.TextField()
+    dificuldade = models.CharField(max_length=20)
+    ano = models.IntegerField()
+    conteudo = models.ForeignKey(Conteudo, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.enunciado
+
+
+class ImagemQuestao(models.Model):
+    arquivo = models.ImageField()
+    ordem = models.IntegerField()
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Imagem da questão {self.questao.id}"
+
+
+class Alternativa(models.Model):
+    letra = models.CharField(max_length=1)
+    texto = models.TextField(blank=True)
+    imagem = models.ImageField(blank=True)
+    e_correta = models.BooleanField()
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Alternativa da questão {self.questao.id}"
+
+
+class TentativaQuestao(models.Model):
+    xp_ganho = models.IntegerField()
+    acertou = models.BooleanField()
+    data_realizacao = models.DateTimeField(auto_now_add=True)
+    numero_tentativa = models.IntegerField()
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    questao = models.ForeignKey(Questao, on_delete=models.PROTECT)
+    alternativa = models.ForeignKey(Alternativa, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"Tentativa {self.numero_tentativa} - Questão {self.questao.id}"
