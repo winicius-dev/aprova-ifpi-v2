@@ -1,21 +1,44 @@
 {% load static %}
 
 <!DOCTYPE html>
-
 <html lang="pt-br">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>AprovaIFPI - Questões</title>
 
-    <link rel="stylesheet" href="{% static 'styles/style.css' %}">
+    <style>
+        .questao {
+            border: 2px solid red;
+            padding: 20px;
+            margin: 20px;
+            scroll-margin-top: 20px;
+        }
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        .resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
 
+        .grafico-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .grafico-circular {
+            width: 150px;
+            height: 150px;
+        }
+
+        .porcentagem {
+            font-size: 22px;
+            font-weight: bold;
+            fill: currentColor;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,86 +47,239 @@
 
     <form method="GET">
 
-        <!-- Status -->
         <label for="filtro-status">Status:</label>
-
         <select name="filtro" id="filtro-status">
-
-            <option value="todas" {% if filtro == "todas" %}selected{% endif %}>
-                Todas
-            </option>
-
-            <option value="nao_respondidas" {% if filtro == "nao_respondidas" %}selected{% endif %}>
-                Não respondidas
-            </option>
-
-            <option value="acertadas" {% if filtro == "acertadas" %}selected{% endif %}>
-                Acertei
-            </option>
-
-            <option value="erradas" {% if filtro == "erradas" %}selected{% endif %}>
-                Errei
-            </option>
-
+            <option value="todas" {% if filtro == "todas" %}selected{% endif %}>Todas</option>
+            <option value="nao_respondidas" {% if filtro == "nao_respondidas" %}selected{% endif %}>Não respondidas</option>
+            <option value="acertadas" {% if filtro == "acertadas" %}selected{% endif %}>Acertei</option>
+            <option value="erradas" {% if filtro == "erradas" %}selected{% endif %}>Errei</option>
         </select>
 
+        <hr>
 
+        <h3>Filtro 1</h3>
 
+        <label for="disciplina1">Disciplina 1:</label>
+        <select name="disciplina1" id="disciplina1">
+            <option value="">Todas</option>
+            {% for disciplina_item in disciplinas %}
+                <option value="{{ disciplina_item.id }}"
+                    {% if disciplina1 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ disciplina_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
 
+        <label for="conteudo1">Conteúdo 1:</label>
+        <select name="conteudo1" id="conteudo1">
+            <option value="">Todos os conteúdos</option>
+            {% for conteudo_item in conteudos %}
+                <option value="{{ conteudo_item.id }}"
+                    data-disciplina="{{ conteudo_item.disciplina_id }}"
+                    {% if conteudo1 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ conteudo_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <hr>
+
+        <h3>Filtro 2</h3>
+
+        <label for="disciplina2">Disciplina 2:</label>
+        <select name="disciplina2" id="disciplina2">
+            <option value="">Todas</option>
+            {% for disciplina_item in disciplinas %}
+                <option value="{{ disciplina_item.id }}"
+                    {% if disciplina2 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ disciplina_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="conteudo2">Conteúdo 2:</label>
+        <select name="conteudo2" id="conteudo2">
+            <option value="">Todos os conteúdos</option>
+            {% for conteudo_item in conteudos %}
+                <option value="{{ conteudo_item.id }}"
+                    data-disciplina="{{ conteudo_item.disciplina_id }}"
+                    {% if conteudo2 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ conteudo_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <hr>
+
+        <h3>Filtro 3</h3>
+
+        <label for="disciplina3">Disciplina 3:</label>
+        <select name="disciplina3" id="disciplina3">
+            <option value="">Todas</option>
+            {% for disciplina_item in disciplinas %}
+                <option value="{{ disciplina_item.id }}"
+                    {% if disciplina3 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ disciplina_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="conteudo3">Conteúdo 3:</label>
+        <select name="conteudo3" id="conteudo3">
+            <option value="">Todos os conteúdos</option>
+            {% for conteudo_item in conteudos %}
+                <option value="{{ conteudo_item.id }}"
+                    data-disciplina="{{ conteudo_item.disciplina_id }}"
+                    {% if conteudo3 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ conteudo_item.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <hr>
+
+        <label for="ano">Ano:</label>
+        <select name="ano" id="ano">
+            <option value="">Todos</option>
+            {% for ano_item in anos %}
+                <option value="{{ ano_item }}"
+                    {% if ano == ano_item|stringformat:"s" %}selected{% endif %}>
+                    {{ ano_item }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="dificuldade">Dificuldade:</label>
+        <select name="dificuldade" id="dificuldade">
+            <option value="">Todas</option>
+            {% for dificuldade_item in dificuldades %}
+                <option value="{{ dificuldade_item }}"
+                    {% if dificuldade == dificuldade_item %}selected{% endif %}>
+                    {{ dificuldade_item }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
         <button type="submit">Filtrar</button>
 
     </form>
 
+    <hr>
 
     {% for questao in questoes %}
 
-        <div>
+        <div id="questao-{{ questao.id }}" class="questao">
 
             <h3>Questão {{ questao.id }}</h3>
 
             <p>Dificuldade: {{ questao.dificuldade }}</p>
-
             <p>Ano: {{ questao.ano }}</p>
-
+            <p>Disciplina: {{ questao.conteudo.disciplina.nome }}</p>
             <p>Conteúdo: {{ questao.conteudo.nome }}</p>
-
             <p>{{ questao.enunciado }}</p>
 
-
             <form method="POST">
-
                 {% csrf_token %}
 
+                <input type="hidden" name="questao_id" value="{{ questao.id }}">
+                <input type="hidden" name="filtro" value="{{ filtro }}">
+                <input type="hidden" name="disciplina1" value="{{ disciplina1 }}">
+                <input type="hidden" name="conteudo1" value="{{ conteudo1 }}">
+                <input type="hidden" name="disciplina2" value="{{ disciplina2 }}">
+                <input type="hidden" name="conteudo2" value="{{ conteudo2 }}">
+                <input type="hidden" name="disciplina3" value="{{ disciplina3 }}">
+                <input type="hidden" name="conteudo3" value="{{ conteudo3 }}">
+                <input type="hidden" name="ano" value="{{ ano }}">
+                <input type="hidden" name="dificuldade" value="{{ dificuldade }}">
+
                 {% for alternativa in questao.alternativa_set.all %}
-
                     <p>
-
                         <input
                             type="radio"
                             name="alternativa"
                             value="{{ alternativa.id }}"
+                            required
                         >
-
-                        {{ alternativa.texto }}
-
+                        {{ alternativa.letra }}. {{ alternativa.texto }}
                     </p>
-
                 {% endfor %}
-
 
                 <button type="submit">Responder</button>
-
             </form>
 
+            {% if resultado_questao and resultado_questao.questao_id == questao.id %}
+
+                <div class="resultado">
+
+                    <h3>Resultado da questão</h3>
+
+                    <div class="grafico-container">
+                        <p><strong>Taxa de acerto na primeira tentativa</strong></p>
+
+                        <svg
+                            class="grafico-circular"
+                            viewBox="0 0 120 120"
+                            role="img"
+                            aria-label="Taxa de acerto de {{ resultado_questao.taxa_acerto }} por cento"
+                        >
+                            <!-- Círculo de fundo -->
+                            <circle
+                                cx="60"
+                                cy="60"
+                                r="48"
+                                fill="none"
+                                stroke="#DCE5F0"
+                                stroke-width="7"
+                            />
+
+                            <!-- Arco azul proporcional à porcentagem -->
+                            <circle
+                                cx="60"
+                                cy="60"
+                                r="48"
+                                fill="none"
+                                stroke="#2675E8"
+                                stroke-width="7"
+                                stroke-linecap="round"
+                                stroke-dasharray="301.59"
+                                stroke-dashoffset="{{ resultado_questao.circunferencia_offset }}"
+                                transform="rotate(-90 60 60)"
+                            />
+
+                            <!-- Porcentagem no centro -->
+                            <text
+                                x="60"
+                                y="66"
+                                text-anchor="middle"
+                                class="porcentagem"
+                            >{{ resultado_questao.taxa_acerto }}%</text>
+                        </svg>
+                    </div>
+
+                    <p>
+                        <strong>Gabarito:</strong>
+                        {{ resultado_questao.gabarito }}
+                    </p>
+
+                    <p>
+                        <strong>XP ganho:</strong>
+                        {{ resultado_questao.xp_ganho }} XP
+                    </p>
+
+                    <p>
+                        <strong>Explicação:</strong>
+                        {{ resultado_questao.explicacao }}
+                    </p>
+
+                </div>
+
+            {% endif %}
 
             {% if messages %}
-
                 {% for message in messages %}
-
                     <p>{{ message }}</p>
-
                 {% endfor %}
-
             {% endif %}
 
         </div>
@@ -111,12 +287,60 @@
         <hr>
 
     {% empty %}
-
         <p>Nenhuma questão encontrada para este filtro.</p>
-
     {% endfor %}
 
+    <script>
+        function configurarFiltro(numero) {
+            const disciplina = document.getElementById("disciplina" + numero);
+            const conteudo = document.getElementById("conteudo" + numero);
+
+            function atualizarConteudos() {
+                const disciplinaSelecionada = disciplina.value;
+
+                Array.from(conteudo.options).forEach(function(opcao) {
+                    if (opcao.value === "") {
+                        opcao.hidden = false;
+                        return;
+                    }
+
+                    opcao.hidden = disciplinaSelecionada !== "" &&
+                        opcao.dataset.disciplina !== disciplinaSelecionada;
+                });
+
+                const opcaoAtual = conteudo.options[conteudo.selectedIndex];
+
+                if (opcaoAtual && opcaoAtual.hidden) {
+                    conteudo.value = "";
+                }
+            }
+
+            disciplina.addEventListener("change", atualizarConteudos);
+            atualizarConteudos();
+        }
+
+        configurarFiltro(1);
+        configurarFiltro(2);
+        configurarFiltro(3);
+
+    </script>
+
+        {% if resultado_questao %}
+        <script>
+            window.addEventListener("load", function() {
+                const questao = document.getElementById(
+                    "questao-{{ resultado_questao.questao_id }}"
+                );
+
+                if (questao) {
+                    questao.scrollIntoView({
+                        behavior: "instant",
+                        block: "start"
+                    });
+                }
+            });
+        </script>
+        {% endif %}
 
 </body>
-
 </html>
