@@ -1,350 +1,1113 @@
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AprovaIFPI - Questões</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'styles/questoes.css' %}?v=2.2">
     <style>
-        .questao {
-            border: 2px solid red;
-            padding: 20px;
-            margin: 20px;
-            scroll-margin-top: 20px;
-        }
-
-        .resultado {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
+        .btn-riscar-alternativa {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
+            color: #64748b;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: auto;
+            flex-shrink: 0;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-
-        .grafico-container {
-            text-align: center;
-            margin: 20px 0;
+        .btn-riscar-alternativa i {
+            font-size: 1.1rem;
+            transition: transform 0.2s ease;
         }
-
-        .grafico-circular {
-            width: 150px;
-            height: 150px;
+        .btn-riscar-alternativa:hover {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #dc2626;
+            transform: scale(1.1);
         }
-
-        .porcentagem {
-            font-size: 22px;
-            font-weight: bold;
-            fill: currentColor;
+        .btn-riscar-alternativa:hover i {
+            transform: rotate(-15deg);
+        }
+        .alternativa-card.cortada {
+            background-color: #f1f5f9 !important;
+            border: 1.5px dashed #94a3b8 !important;
+            opacity: 0.45 !important;
+            box-shadow: none !important;
+        }
+        .alternativa-card.cortada .alternativa-text,
+        .alternativa-card.cortada .alternativa-text strong,
+        .alternativa-card.cortada .alternativa-text span {
+            text-decoration: line-through !important;
+            text-decoration-thickness: 2.5px !important;
+            text-decoration-color: #475569 !important;
+            color: #94a3b8 !important;
+        }
+        .alternativa-card.cortada .custom-radio-wrap {
+            opacity: 0.35;
+        }
+        .alternativa-card.cortada .btn-riscar-alternativa {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+            box-shadow: none;
+        }
+        .alternativa-card.cortada .btn-riscar-alternativa:hover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
         }
     </style>
 </head>
 
-<body>
+<body class="questoes-body">
 
-    <h1>Questões</h1>
+    <header class="fixed-top header-fixed-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-questoes">
+            <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between">
+                
+                <a class="navbar-brand me-3" href="{% url 'questoes' %}">
+                    <img src="{% static 'img/logo_aprovaifpi.svg' %}" alt="Logo AprovaIFPI">
+                </a>
 
-    <form method="GET">
+                <div class="collapse navbar-collapse justify-content-center d-none d-lg-flex" id="navbarMenuDesktop">
+                    <ul class="navbar-nav gap-2 gap-xl-4 align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'questoes' %}">INÍCIO</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'questoes' %}">QUESTÕES</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'conteudos' %}">CONTEÚDOS</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'ranking' %}">RANKING</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'sobre' %}">SOBRE</a>
+                        </li>
+                    </ul>
+                </div>
 
-        <label for="filtro-status">Status:</label>
-        <select name="filtro" id="filtro-status">
-            <option value="todas" {% if filtro == "todas" %}selected{% endif %}>Todas</option>
-            <option value="nao_respondidas" {% if filtro == "nao_respondidas" %}selected{% endif %}>Não respondidas</option>
-            <option value="acertadas" {% if filtro == "acertadas" %}selected{% endif %}>Acertei</option>
-            <option value="erradas" {% if filtro == "erradas" %}selected{% endif %}>Errei</option>
-        </select>
-
-        <hr>
-
-        <h3>Filtro 1</h3>
-
-        <label for="disciplina1">Disciplina 1:</label>
-        <select name="disciplina1" id="disciplina1">
-            <option value="">Todas</option>
-            {% for disciplina_item in disciplinas %}
-                <option value="{{ disciplina_item.id }}"
-                    {% if disciplina1 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ disciplina_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <label for="conteudo1">Conteúdo 1:</label>
-        <select name="conteudo1" id="conteudo1">
-            <option value="">Todos os conteúdos</option>
-            {% for conteudo_item in conteudos %}
-                <option value="{{ conteudo_item.id }}"
-                    data-disciplina="{{ conteudo_item.disciplina_id }}"
-                    {% if conteudo1 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ conteudo_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <hr>
-
-        <h3>Filtro 2</h3>
-
-        <label for="disciplina2">Disciplina 2:</label>
-        <select name="disciplina2" id="disciplina2">
-            <option value="">Todas</option>
-            {% for disciplina_item in disciplinas %}
-                <option value="{{ disciplina_item.id }}"
-                    {% if disciplina2 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ disciplina_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <label for="conteudo2">Conteúdo 2:</label>
-        <select name="conteudo2" id="conteudo2">
-            <option value="">Todos os conteúdos</option>
-            {% for conteudo_item in conteudos %}
-                <option value="{{ conteudo_item.id }}"
-                    data-disciplina="{{ conteudo_item.disciplina_id }}"
-                    {% if conteudo2 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ conteudo_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <hr>
-
-        <h3>Filtro 3</h3>
-
-        <label for="disciplina3">Disciplina 3:</label>
-        <select name="disciplina3" id="disciplina3">
-            <option value="">Todas</option>
-            {% for disciplina_item in disciplinas %}
-                <option value="{{ disciplina_item.id }}"
-                    {% if disciplina3 == disciplina_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ disciplina_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <label for="conteudo3">Conteúdo 3:</label>
-        <select name="conteudo3" id="conteudo3">
-            <option value="">Todos os conteúdos</option>
-            {% for conteudo_item in conteudos %}
-                <option value="{{ conteudo_item.id }}"
-                    data-disciplina="{{ conteudo_item.disciplina_id }}"
-                    {% if conteudo3 == conteudo_item.id|stringformat:"s" %}selected{% endif %}>
-                    {{ conteudo_item.nome }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <hr>
-
-        <label for="ano">Ano:</label>
-        <select name="ano" id="ano">
-            <option value="">Todos</option>
-            {% for ano_item in anos %}
-                <option value="{{ ano_item }}"
-                    {% if ano == ano_item|stringformat:"s" %}selected{% endif %}>
-                    {{ ano_item }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <label for="dificuldade">Dificuldade:</label>
-        <select name="dificuldade" id="dificuldade">
-            <option value="">Todas</option>
-            {% for dificuldade_item in dificuldades %}
-                <option value="{{ dificuldade_item }}"
-                    {% if dificuldade == dificuldade_item %}selected{% endif %}>
-                    {{ dificuldade_item }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <br><br>
-        <button type="submit">Filtrar</button>
-
-        <a href="{% url 'questoes' %}">
-            <button type="button">Limpar</button>
-        </a>
-
-    </form>
-
-    <hr>
-
-    {% for questao in questoes %}
-
-        <div id="questao-{{ questao.id }}" class="questao">
-
-            <h3>Questão {{ questao.id }}</h3>
-
-            <p>Dificuldade: {{ questao.dificuldade }}</p>
-            <p>Ano: {{ questao.ano }}</p>
-            <p>Disciplina: {{ questao.conteudo.disciplina.nome }}</p>
-            <p>Conteúdo: {{ questao.conteudo.nome }}</p>
-            <p>{{ questao.enunciado }}</p>
-
-            <form method="POST">
-                {% csrf_token %}
-
-                <input type="hidden" name="questao_id" value="{{ questao.id }}">
-                <input type="hidden" name="filtro" value="{{ filtro }}">
-                <input type="hidden" name="disciplina1" value="{{ disciplina1 }}">
-                <input type="hidden" name="conteudo1" value="{{ conteudo1 }}">
-                <input type="hidden" name="disciplina2" value="{{ disciplina2 }}">
-                <input type="hidden" name="conteudo2" value="{{ conteudo2 }}">
-                <input type="hidden" name="disciplina3" value="{{ disciplina3 }}">
-                <input type="hidden" name="conteudo3" value="{{ conteudo3 }}">
-                <input type="hidden" name="ano" value="{{ ano }}">
-                <input type="hidden" name="dificuldade" value="{{ dificuldade }}">
-
-                {% for alternativa in questao.alternativa_set.all %}
-                    <p>
-                        <input
-                            type="radio"
-                            name="alternativa"
-                            value="{{ alternativa.id }}"
-                            required
-                        >
-                        {{ alternativa.letra }}. {{ alternativa.texto }}
-                    </p>
-                {% endfor %}
-
-                <button type="submit">Responder</button>
-            </form>
-
-            {% if resultado_questao and resultado_questao.questao_id == questao.id %}
-
-                <div class="resultado">
-
-                    <h3>Resultado da questão</h3>
-
-                    <div class="grafico-container">
-                        <p><strong>Taxa de acerto na primeira tentativa</strong></p>
-
-                        <svg
-                            class="grafico-circular"
-                            viewBox="0 0 120 120"
-                            role="img"
-                            aria-label="Taxa de acerto de {{ resultado_questao.taxa_acerto }} por cento"
-                        >
-                            <!-- Círculo de fundo -->
-                            <circle
-                                cx="60"
-                                cy="60"
-                                r="48"
-                                fill="none"
-                                stroke="#DCE5F0"
-                                stroke-width="7"
-                            />
-
-                            <!-- Arco azul proporcional à porcentagem -->
-                            <circle
-                                cx="60"
-                                cy="60"
-                                r="48"
-                                fill="none"
-                                stroke="#2675E8"
-                                stroke-width="7"
-                                stroke-linecap="round"
-                                stroke-dasharray="301.59"
-                                stroke-dashoffset="{{ resultado_questao.circunferencia_offset }}"
-                                transform="rotate(-90 60 60)"
-                            />
-
-                            <!-- Porcentagem no centro -->
-                            <text
-                                x="60"
-                                y="66"
-                                text-anchor="middle"
-                                class="porcentagem"
-                            >{{ resultado_questao.taxa_acerto }}%</text>
-                        </svg>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="user-avatar-btn dropdown-toggle no-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ perfil.nome|default:request.user.username }}">
+                            <div class="avatar-circle">
+                                {% if perfil.nome %}
+                                    {{ perfil.nome|slice:":1"|upper }}
+                                {% elif request.user.username %}
+                                    {{ request.user.username|slice:":1"|upper }}
+                                {% else %}
+                                    U
+                                {% endif %}
+                            </div>
+                            <i class="bi bi-chevron-down user-avatar-chevron d-none d-sm-inline"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 12px; min-width: 200px;">
+                            <li class="px-3 py-2 border-bottom">
+                                <span class="fw-bold d-block text-truncate" style="font-size: 0.95rem;">{{ perfil.nome|default:request.user.username }}</span>
+                                <small class="text-muted d-block">{{ request.user.email }}</small>
+                                <span class="badge bg-primary text-white mt-1 badge-total-xp" style="font-size: 0.75rem;">{{ perfil.xp|default:0 }} XP</span>
+                            </li>
+                            <li><a class="dropdown-item py-2" href="{% url 'questoes' %}"><i class="bi bi-journal-text me-2"></i>Minhas Questões</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'conteudos' %}"><i class="bi bi-play-circle me-2"></i>Conteúdos</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'ranking' %}"><i class="bi bi-trophy me-2"></i>Ranking</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                        </ul>
                     </div>
 
-                    <p>
-                        <strong>Gabarito:</strong>
-                        {{ resultado_questao.gabarito }}
-                    </p>
+                    <button class="navbar-toggler border-0 ms-1 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Abrir menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
 
-                    <p>
-                        <strong>XP ganho:</strong>
-                        {{ resultado_questao.xp_ganho }} XP
-                    </p>
+                <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="offcanvasNavbar">
+                    <div class="offcanvas-header border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 1rem;">
+                                {% if perfil.nome %}{{ perfil.nome|slice:":1"|upper }}{% else %}U{% endif %}
+                            </div>
+                            <span class="fw-bold text-dark">{{ perfil.nome|default:request.user.username }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul class="navbar-nav gap-2">
+                            <li class="nav-item">
+                                <a class="nav-link py-2" href="{% url 'questoes' %}">INÍCIO</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active text-primary py-2" href="{% url 'questoes' %}">QUESTÕES</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2" href="{% url 'conteudos' %}">CONTEÚDOS</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2" href="{% url 'ranking' %}">RANKING</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2" href="{% url 'sobre' %}">SOBRE</a>
+                            </li>
+                        </ul>
+                        <hr>
+                        <div class="mt-3">
+                            <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100 rounded-pill py-2">
+                                <i class="bi bi-box-arrow-right me-2"></i>Sair
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-                    <p>
-                        <strong>Explicação:</strong>
-                        {{ resultado_questao.explicacao }}
-                    </p>
+            </div>
+        </nav>
+
+        <div class="top-gradient-bar"></div>
+    </header>
+
+    <div class="title-header-bar">
+        <img src="{% static 'img/logo_aprovaifpi.svg' %}" alt="Watermark" class="watermark-bg">
+        <div class="container d-flex align-items-center justify-content-between position-relative">
+            <h4 class="page-title">
+                Questões <span class="brand-accent">IFPI</span>
+            </h4>
+
+            <div class="breadcrumbs-nav d-none d-lg-block">
+                <a href="{% url 'questoes' %}">Início</a> &nbsp;/&nbsp;
+                <a href="{% url 'ranking' %}">Ranking</a> &nbsp;/&nbsp;
+                <a href="{% url 'conteudos' %}">conteúdo</a> &nbsp;/&nbsp;
+                <span class="active">Questões</span>
+            </div>
+
+            <img src="{% static 'img/logo_aprovaifpi 1.svg' %}" alt="Logo Mini" class="mobile-mini-logo">
+        </div>
+    </div>
+
+    <main class="container py-4">
+
+        <section class="filtros-section p-0 bg-transparent border-0 shadow-none mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="filtros-heading mb-0">Filtros de Questões</h5>
+                <button
+                    type="button"
+                    class="btn-toggle-filtro"
+                    id="btnToggleFiltros"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFiltros"
+                    aria-expanded="true"
+                    aria-controls="collapseFiltros"
+                    title="Ocultar/Mostrar Filtros"
+                >
+                    <i class="bi bi-chevron-down" id="iconToggleFiltros"></i>
+                </button>
+            </div>
+
+            <div class="collapse show" id="collapseFiltros">
+                <form method="GET" action="{% url 'questoes' %}" id="form-filtros">
+
+                    <div class="row g-3">
+                        <div class="col-6 col-lg-3 filtro-col-disciplina">
+                            <select name="disciplina" class="filtro-select" id="filtro-disciplina">
+                                <option value="">Disciplina</option>
+                                {% for disc in disciplinas %}
+                                    <option value="{{ disc.id }}" {% if disciplina == disc.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ disc.nome }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-lg-3 filtro-col-ano">
+                            <select name="ano" class="filtro-select" id="filtro-ano">
+                                <option value="">Ano</option>
+                                {% for a in anos %}
+                                    <option value="{{ a }}" {% if ano == a|stringformat:"s" %}selected{% endif %}>
+                                        {{ a }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-lg-3 filtro-col-dificuldade">
+                            <select name="dificuldade" class="filtro-select" id="filtro-dificuldade">
+                                <option value="">Dificuldade</option>
+                                {% for dif in dificuldades %}
+                                    <option value="{{ dif }}" {% if dificuldade == dif %}selected{% endif %}>
+                                        {{ dif }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-lg-3 filtro-col-status">
+                            <select name="filtro" class="filtro-select" id="filtro-status">
+                                <option value="todas" {% if filtro == "todas" or not filtro %}selected{% endif %}>Status</option>
+                                <option value="nao_respondidas" {% if filtro == "nao_respondidas" %}selected{% endif %}>Não respondidas</option>
+                                <option value="acertadas" {% if filtro == "acertadas" %}selected{% endif %}>Acertei</option>
+                                <option value="erradas" {% if filtro == "erradas" %}selected{% endif %}>Errei</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card-assuntos">
+                        <h5 class="card-assuntos-title">
+                            Assuntos <span class="opcional-text">Opcionais</span>
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-4">
+                                <div class="assunto-block">
+                                    <div class="assunto-badge">1</div>
+                                    <div class="assunto-selects">
+                                        <select name="disciplina1" id="disciplina1" class="assunto-select">
+                                            <option value="">Disciplina</option>
+                                            {% for d in disciplinas %}
+                                                <option value="{{ d.id }}" {% if disciplina1 == d.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ d.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="conteudo1" id="conteudo1" class="assunto-select">
+                                            <option value="">Assunto</option>
+                                            {% for c in conteudos %}
+                                                <option value="{{ c.id }}" data-disciplina="{{ c.disciplina_id }}" {% if conteudo1 == c.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ c.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-4">
+                                <div class="assunto-block">
+                                    <div class="assunto-badge">2</div>
+                                    <div class="assunto-selects">
+                                        <select name="disciplina2" id="disciplina2" class="assunto-select">
+                                            <option value="">Disciplina</option>
+                                            {% for d in disciplinas %}
+                                                <option value="{{ d.id }}" {% if disciplina2 == d.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ d.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="conteudo2" id="conteudo2" class="assunto-select">
+                                            <option value="">Assunto</option>
+                                            {% for c in conteudos %}
+                                                <option value="{{ c.id }}" data-disciplina="{{ c.disciplina_id }}" {% if conteudo2 == c.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ c.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-4">
+                                <div class="assunto-block">
+                                    <div class="assunto-badge">3</div>
+                                    <div class="assunto-selects">
+                                        <select name="disciplina3" id="disciplina3" class="assunto-select">
+                                            <option value="">Disciplina</option>
+                                            {% for d in disciplinas %}
+                                                <option value="{{ d.id }}" {% if disciplina3 == d.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ d.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="conteudo3" id="conteudo3" class="assunto-select">
+                                            <option value="">Assunto</option>
+                                            {% for c in conteudos %}
+                                                <option value="{{ c.id }}" data-disciplina="{{ c.disciplina_id }}" {% if conteudo3 == c.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ c.nome }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filtro-actions">
+                        <a href="{% url 'questoes' %}" class="btn-limpar">Limpar</a>
+                        <button type="submit" class="btn-filtrar">Filtrar</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="filtro-scroll-hint">
+                <button
+                    type="button"
+                    class="btn-hint-toggle"
+                    id="btnHintFiltros"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFiltros"
+                    aria-expanded="true"
+                    aria-controls="collapseFiltros"
+                    title="Ocultar/Mostrar Filtros"
+                >
+                    <i class="bi bi-chevron-down" id="iconHintFiltros"></i>
+                </button>
+            </div>
+
+        </section>
+
+        {% for questao in questoes %}
+            <article class="questao-card" id="questao-{{ questao.id }}">
+
+                <div class="questao-header">
+                    <div class="questao-header-left">
+                        <h5 class="questao-id-text">
+                            Q{{ questoes.start_index|add:forloop.counter0|stringformat:"03d" }}
+                        </h5>
+                        <span class="dificuldade-pill {% if questao.dificuldade == 'Fácil' %}facil{% elif questao.dificuldade == 'Médio' %}medio{% else %}dificil{% endif %}">
+                            {{ questao.dificuldade }}
+                        </span>
+                        {% if questao.conteudo %}
+                            <span class="badge-disciplina">
+                                {{ questao.conteudo.disciplina.nome }}
+                            </span>
+                        {% endif %}
+                        <span class="badge-xp-preview">
+                            <i class="bi bi-lightning-charge-fill me-1"></i>+{% if questao.dificuldade == 'Fácil' %}1{% elif questao.dificuldade == 'Médio' %}2{% else %}3{% endif %} XP
+                        </span>
+                        {% if questao.id in respondidas_ids or questao.ultima_tentativa %}
+                            <span class="badge-status-respondida" id="status-badge-{{ questao.id }}">
+                                <i class="bi bi-check2-circle me-1"></i>Respondida
+                            </span>
+                        {% else %}
+                            <span class="badge-status-respondida d-none" id="status-badge-{{ questao.id }}">
+                                <i class="bi bi-check2-circle me-1"></i>Respondida
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-toggle-questao"
+                        id="btn-toggle-q-{{ questao.id }}"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseQuestao-{{ questao.id }}"
+                        aria-expanded="true"
+                        aria-controls="collapseQuestao-{{ questao.id }}"
+                        title="Ocultar/Mostrar Enunciado"
+                    >
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div class="collapse show questao-collapse-body" id="collapseQuestao-{{ questao.id }}">
+
+                    <div class="questao-meta mt-2">
+                        <strong>Ano:</strong> {{ questao.ano }} &nbsp;|&nbsp;
+                        <strong>Órgão:</strong> Instituto Federal do Piauí &nbsp;|&nbsp;
+                        <strong>Prova:</strong> Curso Ensino Médio Integrado
+                    </div>
+
+                    <div class="questao-enunciado">
+                        {{ questao.enunciado|linebreaksbr }}
+                    </div>
+
+                    {% for img in questao.imagemquestao_set.all %}
+                        <div class="text-center my-3">
+                            <img src="{{ img.arquivo.url }}" alt="Imagem da questão {{ questao.id }}" class="questao-imagem img-fluid">
+                        </div>
+                    {% endfor %}
+
+                    <form method="POST" action="{% url 'questoes' %}" class="form-resposta-ajax" id="form-questao-{{ questao.id }}" data-questao-id="{{ questao.id }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="questao_id" value="{{ questao.id }}">
+                        <input type="hidden" name="ajax" value="1">
+
+                        <div class="alternativas-list" id="alternativas-list-{{ questao.id }}">
+                            {% for alternativa in questao.alternativa_set.all %}
+                                <label class="alternativa-card" id="alt-card-{{ alternativa.id }}" for="alt-{{ alternativa.id }}">
+                                    <div class="custom-radio-wrap">
+                                        <input
+                                            type="radio"
+                                            name="alternativa"
+                                            id="alt-{{ alternativa.id }}"
+                                            value="{{ alternativa.id }}"
+                                            required
+                                            {% if questao.ultima_tentativa and questao.ultima_tentativa.alternativa_id == alternativa.id %}checked{% elif resultado_questao and resultado_questao.questao_id == questao.id and resultado_questao.alternativa_escolhida_id == alternativa.id %}checked{% endif %}
+                                        >
+                                        <div class="radio-check-circle"></div>
+                                    </div>
+                                    <span class="alternativa-text">
+                                        <strong>{{ alternativa.letra }})</strong> {{ alternativa.texto }}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        class="btn-riscar-alternativa"
+                                        data-alt-id="{{ alternativa.id }}"
+                                        title="Cortar alternativa que você acha incorreta"
+                                        aria-label="Cortar alternativa"
+                                    >
+                                        <i class="bi bi-scissors"></i>
+                                    </button>
+                                </label>
+                            {% endfor %}
+                        </div>
+
+                        {% if questao.ultima_tentativa %}
+                            <button type="submit" class="btn-responder btn-responder-novamente" id="btn-responder-{{ questao.id }}">
+                                <i class="bi bi-arrow-repeat me-1"></i> Responder novamente
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn-responder" id="btn-responder-{{ questao.id }}">
+                                Responder
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <div class="resultado-placeholder" id="resultado-container-{{ questao.id }}">
+                        {% if questao.ultima_tentativa %}
+                            <div class="resultado-card resultado-card-animated mt-3" id="resultado-{{ questao.id }}">
+                                {% if questao.ultima_tentativa.acertou %}
+                                    <div class="feedback-badge feedback-acerto">
+                                        <div class="feedback-badge-icon"><i class="bi bi-check-circle-fill"></i></div>
+                                        <div>
+                                            <div class="feedback-title">Parabéns! Resposta Correta! 🎉</div>
+                                            {% if questao.ultima_tentativa.numero_tentativa == 1 %}
+                                                <div class="feedback-subtitle">Você ganhou <strong>+{{ questao.ultima_tentativa.xp_ganho }} XP</strong> nesta questão!</div>
+                                            {% else %}
+                                                <div class="feedback-subtitle">Você acertou nesta tentativa! <small class="text-muted">(XP concedido apenas na 1ª tentativa)</small></div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="feedback-badge feedback-erro">
+                                        <div class="feedback-badge-icon"><i class="bi bi-x-circle-fill"></i></div>
+                                        <div>
+                                            <div class="feedback-title">Resposta Incorreta!</div>
+                                            <div class="feedback-subtitle">Você pode tentar responder novamente ou clicar em "Ver Gabarito" para conferir.</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="resultado-content">
+                                    <div class="resultado-stat-box anim-slide-up-1">
+                                        <svg class="resultado-chart" viewBox="0 0 120 120" role="img">
+                                            <circle cx="60" cy="60" r="48" fill="none" stroke="#DCE5F0" stroke-width="8" />
+                                            <circle
+                                                class="resultado-chart-circle"
+                                                id="chart-circle-{{ questao.id }}"
+                                                cx="60" cy="60" r="48"
+                                                fill="none" stroke="#0056d6" stroke-width="8"
+                                                stroke-linecap="round"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="{{ questao.circunferencia_offset|default:'0' }}"
+                                                transform="rotate(-90 60 60)"
+                                            />
+                                            <text
+                                                id="chart-text-{{ questao.id }}"
+                                                x="60" y="68" text-anchor="middle"
+                                                fill="#0056d6" font-size="24" font-weight="800" font-family="sans-serif"
+                                            >{{ questao.taxa_acerto|default:'100' }}%</text>
+                                        </svg>
+                                        <div class="resultado-stat-text">
+                                            Taxa de Acertos da<br>questão %
+                                        </div>
+                                    </div>
+
+                                    <div class="resultado-xp anim-slide-up-2">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i>XP: +{{ questao.ultima_tentativa.xp_ganho }}
+                                    </div>
+
+                                    <div class="anim-slide-up-3">
+                                        <button
+                                            class="btn-toggle-gabarito"
+                                            id="btn-toggle-gabarito-{{ questao.id }}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#painel-gabarito-{{ questao.id }}"
+                                            aria-expanded="false"
+                                            data-questao-id="{{ questao.id }}"
+                                            data-gabarito-id="{{ questao.gabarito_id }}"
+                                        >
+                                            <i class="bi bi-eye me-1"></i> Ver Gabarito e Explicação
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="collapse mt-3" id="painel-gabarito-{{ questao.id }}">
+                                    <div class="painel-gabarito-box">
+                                        <div class="resultado-gabarito-destaque mb-3">
+                                            <i class="bi bi-check-circle-fill text-success me-1"></i> Gabarito Oficial: <strong>Alternativa {{ questao.gabarito_letra }}</strong>
+                                        </div>
+                                        <div class="explicacao-box">
+                                            <h6 class="fw-bold mb-2 text-primary">
+                                                <i class="bi bi-info-circle me-1"></i> Comentário do Professor
+                                            </h6>
+                                            <p class="mb-0">A pontuação empregada liga duas orações coordenadas, marcando uma pausa expressiva e relação lógica entre as proposições.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif resultado_questao and resultado_questao.questao_id == questao.id %}
+                            <div class="resultado-card resultado-card-animated mt-3" id="resultado-{{ questao.id }}">
+                                {% if resultado_questao.acertou %}
+                                    <div class="feedback-badge feedback-acerto">
+                                        <div class="feedback-badge-icon"><i class="bi bi-check-circle-fill"></i></div>
+                                        <div>
+                                            <div class="feedback-title">Parabéns! Resposta Correta! 🎉</div>
+                                            {% if resultado_questao.numero_tentativa == 1 %}
+                                                <div class="feedback-subtitle">Você ganhou <strong>+{{ resultado_questao.xp_ganho }} XP</strong> nesta questão!</div>
+                                            {% else %}
+                                                <div class="feedback-subtitle">Você acertou nesta tentativa! <small class="text-muted">(XP concedido apenas na 1ª tentativa)</small></div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="feedback-badge feedback-erro">
+                                        <div class="feedback-badge-icon"><i class="bi bi-x-circle-fill"></i></div>
+                                        <div>
+                                            <div class="feedback-title">Resposta Incorreta!</div>
+                                            <div class="feedback-subtitle">Você pode tentar responder novamente ou clicar em "Ver Gabarito" para conferir.</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="resultado-content">
+                                    <div class="resultado-stat-box anim-slide-up-1">
+                                        <svg class="resultado-chart" viewBox="0 0 120 120" role="img">
+                                            <circle cx="60" cy="60" r="48" fill="none" stroke="#DCE5F0" stroke-width="8" />
+                                            <circle
+                                                class="resultado-chart-circle"
+                                                id="chart-circle-{{ questao.id }}"
+                                                cx="60" cy="60" r="48"
+                                                fill="none" stroke="#0056d6" stroke-width="8"
+                                                stroke-linecap="round"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="{{ resultado_questao.circunferencia_offset }}"
+                                                transform="rotate(-90 60 60)"
+                                            />
+                                            <text
+                                                id="chart-text-{{ questao.id }}"
+                                                x="60" y="68" text-anchor="middle"
+                                                fill="#0056d6" font-size="24" font-weight="800" font-family="sans-serif"
+                                            >{{ resultado_questao.taxa_acerto }}%</text>
+                                        </svg>
+                                        <div class="resultado-stat-text">
+                                            Taxa de Acertos da<br>questão %
+                                        </div>
+                                    </div>
+
+                                    <div class="resultado-xp anim-slide-up-2">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i>XP: +{{ resultado_questao.xp_ganho }}
+                                    </div>
+
+                                    <div class="anim-slide-up-3">
+                                        <button
+                                            class="btn-toggle-gabarito"
+                                            id="btn-toggle-gabarito-{{ questao.id }}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#painel-gabarito-{{ questao.id }}"
+                                            aria-expanded="false"
+                                            data-questao-id="{{ questao.id }}"
+                                            data-gabarito-id="{{ resultado_questao.gabarito_id }}"
+                                        >
+                                            <i class="bi bi-eye me-1"></i> Ver Gabarito e Explicação
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="collapse mt-3" id="painel-gabarito-{{ questao.id }}">
+                                    <div class="painel-gabarito-box">
+                                        <div class="resultado-gabarito-destaque mb-3">
+                                            <i class="bi bi-check-circle-fill text-success me-1"></i> Gabarito Oficial: <strong>Alternativa {{ resultado_questao.gabarito }}</strong>
+                                        </div>
+                                        <div class="explicacao-box">
+                                            <h6 class="fw-bold mb-2 text-primary">
+                                                <i class="bi bi-info-circle me-1"></i> Comentário do Professor
+                                            </h6>
+                                            <p class="mb-0">{{ resultado_questao.explicacao }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="questao-card-footer">
+                        <button
+                            type="button"
+                            class="btn-hint-toggle"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseQuestao-{{ questao.id }}"
+                            aria-expanded="true"
+                            aria-controls="collapseQuestao-{{ questao.id }}"
+                            title="Ocultar/Mostrar Enunciado"
+                        >
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
 
                 </div>
 
-            {% endif %}
+            </article>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            {% endif %}
+        {% empty %}
+            <div class="empty-state-card">
+                <i class="bi bi-funnel"></i>
+                <h5>Nenhuma questão encontrada</h5>
+                <p>Não encontramos questões com os filtros selecionados. Tente alterar os filtros ou limpar a busca.</p>
+                <a href="{% url 'questoes' %}" class="btn-filtrar text-decoration-none d-inline-block mt-2">
+                    Ver todas as questões
+                </a>
+            </div>
+        
+        {% endfor %}
 
+        {% if paginador.num_pages > 1 %}
+            <nav aria-label="Navegação das questões" class="d-flex justify-content-center my-4">
+                <ul class="pagination flex-wrap justify-content-center">
+
+                    {% if questoes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring_paginacao %}{{ querystring_paginacao }}&{% endif %}page=1">
+                                Primeira
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring_paginacao %}{{ querystring_paginacao }}&{% endif %}page={{ questoes.previous_page_number }}">
+                                Anterior
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Primeira</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">Anterior</span>
+                        </li>
+                    {% endif %}
+
+                    {% for numero in paginador.page_range %}
+                        <li class="page-item {% if numero == questoes.number %}active{% endif %}">
+                            <a class="page-link" href="?{% if querystring_paginacao %}{{ querystring_paginacao }}&{% endif %}page={{ numero }}">
+                                {{ numero }}
+                            </a>
+                        </li>
+                    {% endfor %}
+
+                    {% if questoes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring_paginacao %}{{ querystring_paginacao }}&{% endif %}page={{ questoes.next_page_number }}">
+                                Próxima
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring_paginacao %}{{ querystring_paginacao }}&{% endif %}page={{ paginador.num_pages }}">
+                                Última
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Próxima</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">Última</span>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        {% endif %}
+
+    </main>
+
+
+    <footer class="bg-light text-dark pt-5 pb-4 mt-5 border-top">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">APROVAIFPI.COM</h6>
+                    <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                        <li><a href="{% url 'logout' %}" class="text-secondary text-decoration-none d-block py-1">Login</a></li>
+                        <li><a href="{% url 'questoes' %}" class="text-secondary text-decoration-none d-block py-1">Questões</a></li>
+                        <li><a href="{% url 'conteudos' %}" class="text-secondary text-decoration-none d-block py-1">Conteúdos</a></li>
+                        <li><a href="{% url 'ranking' %}" class="text-secondary text-decoration-none d-block py-1">Rankings</a></li>
+                        <li><a href="{% url 'sobre' %}" class="text-secondary text-decoration-none d-block py-1">Sobre</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">COLABORADORES</h6>
+                    <ul class="list-unstyled mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.8;">
+                        <li>Aluno João Gabriel Lopes</li>
+                        <li>Aluno Marcos Winicius Gomes</li>
+                        <li>Aluno Victor Daniel Castro</li>
+                        <li>Prof. Alexandre Cajazeira</li>
+                        <li>Prof. Alexandre Lages</li>
+                    </ul>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">RECURSOS UTILIZADOS</h6>
+                    <ul class="list-unstyled mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.8;">
+                        <li>Bootstrap 5</li>
+                        <li>HTML</li>
+                        <li>CSS</li>
+                        <li>JAVA SCRIPT</li>
+                    </ul>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <h6 class="text-uppercase fw-bold text-dark mb-3">DISCIPLINAS</h6>
+                    <ul class="list-unstyled mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.8;">
+                        <li>Português</li>
+                        <li>Matemática</li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4 text-muted">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center">
+                    <img src="{% static 'img/logo_aprovaifpi 1.svg' %}" alt="Logo AprovaIFPI" height="36" class="me-2">
+                    <span class="text-dark fw-bold" style="font-size: 0.85rem;">© 2025 - Um produto AprovaIFPI.com</span>
+                </div>
+            </div>
         </div>
+    </footer>
 
-        <hr>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    {% empty %}
-        <p>Nenhuma questão encontrada para este filtro.</p>
-    {% endfor %}
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
     <script>
-        function configurarFiltro(numero) {
-            const disciplina = document.getElementById("disciplina" + numero);
-            const conteudo = document.getElementById("conteudo" + numero);
+        document.addEventListener("DOMContentLoaded", function() {
+            function configurarFiltroAssunto(num) {
+                const discSelect = document.getElementById("disciplina" + num);
+                const contSelect = document.getElementById("conteudo" + num);
 
-            function atualizarConteudos() {
-                const disciplinaSelecionada = disciplina.value;
+                if (!discSelect || !contSelect) return;
 
-                Array.from(conteudo.options).forEach(function(opcao) {
-                    if (opcao.value === "") {
-                        opcao.hidden = false;
-                        return;
+                function atualizarConteudos() {
+                    const discId = discSelect.value;
+                    const options = contSelect.querySelectorAll("option");
+
+                    options.forEach(opt => {
+                        if (opt.value === "") {
+                            opt.hidden = false;
+                            return;
+                        }
+                        opt.hidden = discId !== "" && opt.dataset.disciplina !== discId;
+                    });
+
+                    const selectedOpt = contSelect.options[contSelect.selectedIndex];
+                    if (selectedOpt && selectedOpt.hidden) {
+                        contSelect.value = "";
                     }
-
-                    opcao.hidden = disciplinaSelecionada !== "" &&
-                        opcao.dataset.disciplina !== disciplinaSelecionada;
-                });
-
-                const opcaoAtual = conteudo.options[conteudo.selectedIndex];
-
-                if (opcaoAtual && opcaoAtual.hidden) {
-                    conteudo.value = "";
                 }
+
+                discSelect.addEventListener("change", atualizarConteudos);
+                atualizarConteudos();
             }
 
-            disciplina.addEventListener("change", atualizarConteudos);
-            atualizarConteudos();
-        }
+            configurarFiltroAssunto(1);
+            configurarFiltroAssunto(2);
+            configurarFiltroAssunto(3);
 
-        configurarFiltro(1);
-        configurarFiltro(2);
-        configurarFiltro(3);
+            const collapseFiltros = document.getElementById("collapseFiltros");
+            const btnToggleFiltros = document.getElementById("btnToggleFiltros");
+            const btnHintFiltros = document.getElementById("btnHintFiltros");
 
-    </script>
+            if (collapseFiltros) {
+                collapseFiltros.addEventListener("hide.bs.collapse", function() {
+                    if (btnToggleFiltros) btnToggleFiltros.classList.add("collapsed");
+                    if (btnHintFiltros) btnHintFiltros.classList.add("collapsed");
+                });
+                collapseFiltros.addEventListener("show.bs.collapse", function() {
+                    if (btnToggleFiltros) btnToggleFiltros.classList.remove("collapsed");
+                    if (btnHintFiltros) btnHintFiltros.classList.remove("collapsed");
+                });
+            }
 
-        {% if resultado_questao %}
-        <script>
-            window.addEventListener("load", function() {
-                const questao = document.getElementById(
-                    "questao-{{ resultado_questao.questao_id }}"
-                );
+            document.querySelectorAll(".questao-collapse-body").forEach(function(cBody) {
+                const qId = cBody.id.replace("collapseQuestao-", "");
+                const card = document.getElementById("questao-" + qId);
 
-                if (questao) {
-                    questao.scrollIntoView({
-                        behavior: "instant",
-                        block: "start"
-                    });
+                cBody.addEventListener("hide.bs.collapse", function() {
+                    if (card) {
+                        card.classList.add("collapsed-card");
+                        card.querySelectorAll(".btn-toggle-questao, .btn-hint-toggle").forEach(b => b.classList.add("collapsed"));
+                    }
+                });
+                cBody.addEventListener("show.bs.collapse", function() {
+                    if (card) {
+                        card.classList.remove("collapsed-card");
+                        card.querySelectorAll(".btn-toggle-questao, .btn-hint-toggle").forEach(b => b.classList.remove("collapsed"));
+                    }
+                });
+            });
+
+            document.addEventListener("click", function(e) {
+                const btnRiscar = e.target.closest(".btn-riscar-alternativa");
+                if (!btnRiscar) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const altId = btnRiscar.getAttribute("data-alt-id");
+                const card = document.getElementById("alt-card-" + altId);
+                if (!card) return;
+
+                const estaCortada = card.classList.toggle("cortada");
+
+                if (estaCortada) {
+                    btnRiscar.title = "Restaurar alternativa";
+                    const radio = card.querySelector("input[type='radio']");
+                    if (radio && radio.checked) {
+                        radio.checked = false;
+                    }
+                } else {
+                    btnRiscar.title = "Cortar alternativa que você acha incorreta";
                 }
             });
-        </script>
-        {% endif %}
+
+            document.addEventListener("show.bs.collapse", function(e) {
+                if (e.target && e.target.id && e.target.id.startsWith("painel-gabarito-")) {
+                    const qId = e.target.id.replace("painel-gabarito-", "");
+                    const btn = document.getElementById("btn-toggle-gabarito-" + qId);
+                    if (btn) {
+                        btn.innerHTML = '<i class="bi bi-eye-slash me-1"></i> Ocultar Gabarito e Explicação';
+                        btn.classList.add("active-revealed");
+                        const gabaritoId = btn.getAttribute("data-gabarito-id");
+                        if (gabaritoId) {
+                            const cardCorreta = document.getElementById("alt-card-" + gabaritoId);
+                            if (cardCorreta) {
+                                cardCorreta.classList.add("correct");
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.addEventListener("hide.bs.collapse", function(e) {
+                if (e.target && e.target.id && e.target.id.startsWith("painel-gabarito-")) {
+                    const qId = e.target.id.replace("painel-gabarito-", "");
+                    const btn = document.getElementById("btn-toggle-gabarito-" + qId);
+                    if (btn) {
+                        btn.innerHTML = '<i class="bi bi-eye me-1"></i> Ver Gabarito e Explicação';
+                        btn.classList.remove("active-revealed");
+                        const gabaritoId = btn.getAttribute("data-gabarito-id");
+                        if (gabaritoId) {
+                            const cardCorreta = document.getElementById("alt-card-" + gabaritoId);
+                            if (cardCorreta) {
+                                cardCorreta.classList.remove("correct");
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.addEventListener("change", function(e) {
+                if (e.target && e.target.matches("input[type='radio'][name='alternativa']")) {
+                    const form = e.target.closest("form");
+                    if (form) {
+                        form.querySelectorAll(".alternativa-card").forEach(c => c.classList.remove("correct", "incorrect"));
+                    }
+                }
+            });
+
+            document.querySelectorAll(".form-resposta-ajax").forEach(function(form) {
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    const questaoId = form.getAttribute("data-questao-id");
+                    const btnResponder = document.getElementById("btn-responder-" + questaoId);
+                    const resultadoContainer = document.getElementById("resultado-container-" + questaoId);
+                    const statusBadge = document.getElementById("status-badge-" + questaoId);
+
+                    btnResponder.disabled = true;
+                    btnResponder.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Validando...';
+
+                    const formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.sucesso) {
+                            alert("Não foi possível registrar a resposta. Tente novamente.");
+                            btnResponder.disabled = false;
+                            btnResponder.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> Responder novamente';
+                            return;
+                        }
+
+                        btnResponder.disabled = false;
+                        btnResponder.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> Responder novamente';
+                        btnResponder.classList.add("btn-responder-novamente");
+                        if (statusBadge) statusBadge.classList.remove("d-none");
+
+                        form.querySelectorAll("input[type='radio']").forEach(r => r.disabled = false);
+
+                        const alternativasList = document.getElementById("alternativas-list-" + data.questao_id);
+                        if (alternativasList) {
+                            alternativasList.querySelectorAll(".alternativa-card").forEach(c => {
+                                c.classList.remove("correct", "incorrect");
+                            });
+                        }
+
+                        document.querySelectorAll(".badge-total-xp").forEach(b => {
+                            b.textContent = data.total_xp + " XP";
+                        });
+
+                        const feedbackHtml = data.acertou ? `
+                            <div class="feedback-badge feedback-acerto">
+                                <div class="feedback-badge-icon"><i class="bi bi-check-circle-fill"></i></div>
+                                <div>
+                                    <div class="feedback-title">Parabéns! Resposta Correta! 🎉</div>
+                                    ${data.numero_tentativa === 1 
+                                        ? `<div class="feedback-subtitle">Você ganhou <strong>+${data.xp_ganho} XP</strong> nesta questão!</div>`
+                                        : `<div class="feedback-subtitle">Você acertou nesta tentativa! <small class="text-muted">(XP concedido apenas na 1ª tentativa)</small></div>`
+                                    }
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="feedback-badge feedback-erro">
+                                <div class="feedback-badge-icon"><i class="bi bi-x-circle-fill"></i></div>
+                                <div>
+                                    <div class="feedback-title">Resposta Incorreta!</div>
+                                    <div class="feedback-subtitle">Você pode tentar responder novamente escolhendo outra alternativa ou clicar em "Ver Gabarito" para conferir.</div>
+                                </div>
+                            </div>
+                        `;
+
+                        resultadoContainer.innerHTML = `
+                            <div class="resultado-card resultado-card-animated mt-3" id="resultado-${data.questao_id}">
+                                ${feedbackHtml}
+                                <div class="resultado-content">
+                                    <div class="resultado-stat-box anim-slide-up-1">
+                                        <svg class="resultado-chart" viewBox="0 0 120 120" role="img">
+                                            <circle cx="60" cy="60" r="48" fill="none" stroke="#DCE5F0" stroke-width="8" />
+                                            <circle
+                                                class="resultado-chart-circle"
+                                                id="chart-circle-${data.questao_id}"
+                                                cx="60" cy="60" r="48"
+                                                fill="none" stroke="#0056d6" stroke-width="8"
+                                                stroke-linecap="round"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="301.59"
+                                                transform="rotate(-90 60 60)"
+                                            />
+                                            <text
+                                                id="chart-text-${data.questao_id}"
+                                                x="60" y="68" text-anchor="middle"
+                                                fill="#0056d6" font-size="24" font-weight="800" font-family="sans-serif"
+                                            >0%</text>
+                                        </svg>
+                                        <div class="resultado-stat-text">
+                                            Taxa de Acertos da<br>questão %
+                                        </div>
+                                    </div>
+
+                                    <div class="resultado-xp anim-slide-up-2">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i>XP: +${data.xp_ganho}
+                                    </div>
+
+                                    <div class="anim-slide-up-3">
+                                        <button
+                                            class="btn-toggle-gabarito"
+                                            id="btn-toggle-gabarito-${data.questao_id}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#painel-gabarito-${data.questao_id}"
+                                            aria-expanded="false"
+                                            data-questao-id="${data.questao_id}"
+                                            data-gabarito-id="${data.gabarito_id}"
+                                        >
+                                            <i class="bi bi-eye me-1"></i> Ver Gabarito e Explicação
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="collapse mt-3" id="painel-gabarito-${data.questao_id}">
+                                    <div class="painel-gabarito-box">
+                                        <div class="resultado-gabarito-destaque mb-3">
+                                            <i class="bi bi-check-circle-fill text-success me-1"></i> Gabarito Oficial: <strong>Alternativa ${data.gabarito}</strong>
+                                        </div>
+                                        <div class="explicacao-box">
+                                            <h6 class="fw-bold mb-2 text-primary">
+                                                <i class="bi bi-info-circle me-1"></i> Comentário do Professor
+                                            </h6>
+                                            <p class="mb-0">${data.explicacao}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        const chartCircle = document.getElementById("chart-circle-" + data.questao_id);
+                        const chartText = document.getElementById("chart-text-" + data.questao_id);
+                        if (chartCircle && chartText) {
+                            setTimeout(() => {
+                                chartCircle.style.strokeDashoffset = data.circunferencia_offset;
+                            }, 150);
+
+                            const duration = 1100;
+                            const startTime = performance.now();
+                            const targetVal = parseFloat(data.taxa_acerto) || 0;
+
+                            function updateCount(now) {
+                                const progress = Math.min((now - startTime) / duration, 1);
+                                const easeOut = 1 - Math.pow(1 - progress, 3);
+                                chartText.textContent = (easeOut * targetVal).toFixed(targetVal % 1 === 0 ? 0 : 1) + "%";
+                                if (progress < 1) requestAnimationFrame(updateCount);
+                                else chartText.textContent = targetVal + "%";
+                            }
+                            setTimeout(() => requestAnimationFrame(updateCount), 150);
+                        }
+
+                        if (data.acertou && typeof confetti === "function") {
+                            confetti({
+                                particleCount: 75,
+                                spread: 80,
+                                origin: { y: 0.6 }
+                            });
+                            setTimeout(() => {
+                                confetti({ particleCount: 35, angle: 60, spread: 55, origin: { x: 0 } });
+                                confetti({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1 } });
+                            }, 250);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro na requisição:", error);
+                        btnResponder.disabled = false;
+                        btnResponder.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> Responder novamente';
+                    });
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
